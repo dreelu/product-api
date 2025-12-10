@@ -1,0 +1,15 @@
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "nome": "Colher x3",
+    "preco": "10",
+    "estoque": "58"
+}
+###
+GET http://localhost:3000/products 
+//ACEITA PARAMS
+
+###
+
+PUT http://localhost:3000/products
