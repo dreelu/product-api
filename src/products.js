@@ -16,12 +16,22 @@ export class DatabasePostgres {
     async list(nome) {
         let produtos
 
-        if (nome) {
+        if (nome && nome != '') {
             produtos = await sql`SELECT * FROM produtos WHERE nome ILIKE ${`%${nome}%`}`
         } else {
             produtos = await sql`SELECT * FROM produtos`
         }
         
         return produtos
+    }
+
+    async update(id, produto) {
+        const { nome, preco, estoque } = produto
+
+        await sql`UPDATE produtos SET nome = ${nome}, preco = ${preco}, estoque = ${estoque} WHERE id = ${id}`
+    }
+
+    async delete(id) {
+        await sql`DELETE FROM produtos WHERE id = ${id}`
     }
 }

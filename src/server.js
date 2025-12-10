@@ -16,11 +16,26 @@ fastify.post('/products', async (req, reply) => {
 
 fastify.get('/products', async (req, reply) => {
     const { nome } = req.query
-    console.log(`NOME: ${nome}`)
 
     const products = await database.list(nome)
 
     return products
+})
+
+fastify.put('/products/:id', async (req, reply) => {
+    const { id } = req.params
+
+    await database.update(id, req.body)
+
+    return reply.code(204).send()
+})
+
+fastify.delete('/products/:id', async (req, reply) => {
+    const { id } = req.params
+    
+    await database.delete(id)
+
+    return reply.code(204).send()
 })
 
 fastify.listen({

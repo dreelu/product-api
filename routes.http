@@ -7,9 +7,18 @@ Content-Type: application/json
     "estoque": "58"
 }
 ###
-GET http://localhost:3000/products 
-//ACEITA PARAMS
+GET http://localhost:3000/products
 
 ###
 
-PUT http://localhost:3000/products
+PUT http://localhost:3000/products/
+Content-Type: application/json
+
+{
+    "nome": "Jogo de cama",
+    "preco": "89.99",
+    "estoque": "20"
+}
+
+###
+DELETE http://localhost:3000/products/dbf6ca9b-80e8-4ca8-82da-3305aa527d06
