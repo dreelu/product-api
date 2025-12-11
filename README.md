@@ -37,7 +37,7 @@ PORT=3000
 # Installation
 
 ```bash
-git clone https://github.com/dreelu/product-api)
+git clone https://github.com/dreelu/product-api
 cd product-api
 npm install
 ```
