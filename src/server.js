@@ -9,33 +9,53 @@ const fastify = Fastify({
 })
 
 fastify.post('/products', async (req, reply) => {
-    await database.create(req.body)
+    try {
+        await database.create(req.body)
 
-    return reply.code(201).send()
+        return reply.code(201).send()
+    }catch(error) {
+        console.error(error)
+        return reply.status(500).send( {error: 'Internal server error'})
+    }
 })
 
 fastify.get('/products', async (req, reply) => {
-    const { nome } = req.query
+    try {
+        const { nome } = req.query
 
-    const products = await database.list(nome)
+        const products = await database.list(nome)
 
-    return products
+        return products
+    } catch (error) {
+        console.error(error)
+        return reply.status(500).send( {error: 'Internal server error'})
+    }
 })
 
 fastify.put('/products/:id', async (req, reply) => {
-    const { id } = req.params
+    try {
+        const { id } = req.params
 
-    await database.update(id, req.body)
+        await database.update(id, req.body)
 
-    return reply.code(204).send()
+        return reply.code(204).send()
+    } catch(error) {
+        console.error(error)
+        return reply.status(500).send( {error: 'Internal server error'})
+    }
 })
 
 fastify.delete('/products/:id', async (req, reply) => {
-    const { id } = req.params
-    
-    await database.delete(id)
+    try {
+        const { id } = req.params
+        
+        await database.delete(id)
 
-    return reply.code(204).send()
+        return reply.code(204).send()
+    } catch(error) {
+        console.error(error)
+        return reply.status(500).send( {error: 'Internal server error'})
+    }
 })
 
 fastify.listen({

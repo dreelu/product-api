@@ -2,23 +2,27 @@ POST http://localhost:3000/products
 Content-Type: application/json
 
 {
-    "nome": "Colher x3",
-    "preco": "10",
-    "estoque": "58"
+    "nome": "Name example",
+    "preco": "Price example",
+    "estoque": "Stock example"
 }
 ###
 GET http://localhost:3000/products
+//May contain an name. 
 
 ###
 
 PUT http://localhost:3000/products/
+//Need a ID
+
 Content-Type: application/json
 
 {
-    "nome": "Jogo de cama",
-    "preco": "89.99",
-    "estoque": "20"
+    "nome": "Name example",
+    "preco": "Price example",
+    "estoque": "Stock example"
 }
 
 ###
-DELETE http://localhost:3000/products/dbf6ca9b-80e8-4ca8-82da-3305aa527d06
+DELETE http://localhost:3000/products/
+//Need a ID to work
