@@ -57,7 +57,11 @@ fastify.delete('/products/:id', async (req, reply) => {
     }
 })
 
+
+const PORT = process.env.PORT || 3000
+
 fastify.listen({
-    port: 3000,
+    port: PORT,
+    host: '0.0.0.0',
     listenTextResolver: () => console.log('http://localhost:3000')
 })
