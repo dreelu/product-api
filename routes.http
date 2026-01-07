@@ -2,9 +2,9 @@ POST http://localhost:3000/products
 Content-Type: application/json
 
 {
-    "nome": "Name example",
-    "preco": "Price example",
-    "estoque": "Stock example"
+    "name": "Name example",
+    "price": 10,
+    "stock": 10
 }
 ###
 GET http://localhost:3000/products
@@ -18,9 +18,9 @@ PUT http://localhost:3000/products/
 Content-Type: application/json
 
 {
-    "nome": "Name example",
-    "preco": "Price example",
-    "estoque": "Stock example"
+    "name": "Name example",
+    "price": "Price example",
+    "stock": "Stock example"
 }
 
 ###

@@ -50,7 +50,7 @@ npm install
 
 Returns all products.
 
-### GET /products/search?nome=value
+### GET /products/search?name=value
 
 Search products by name (ILIKE).
 
@@ -65,9 +65,9 @@ Expected body:
 
 ```json
 {
-  "nome": "Martelo",
-  "preco": 10.00,
-  "estoque": 50
+  "name": "Martelo",
+  "price": 10.00,
+  "stock": 50
 }
 ```
 
@@ -82,11 +82,11 @@ Deletes a product.
 ## Database table
 
 ```sql
-CREATE TABLE produtos (
+CREATE TABLE products (
   id UUID PRIMARY KEY,
-  nome TEXT NOT NULL,
-  preco NUMERIC(10,2) NOT NULL,
-  estoque INT NOT NULL
+  name TEXT NOT NULL,
+  price NUMERIC(10,2) NOT NULL,
+  stock INT NOT NULL
 );
 ```
 

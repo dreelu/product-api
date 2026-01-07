@@ -1,37 +1,40 @@
 import { randomUUID } from "crypto";
-import sql from './bd.js'
+import { neon } from '@neondatabase/serverless';
+import 'dotenv/config';
 
-export class DatabasePostgres {
+const sql = neon(String(process.env.DATABASE_URL))
+
+export class Database {
     #videos = new Map()
 
     async create(produto) {
         
         const produtoID = randomUUID()
 
-        const { nome, preco, estoque } = produto
+        const { name, price, stock } = produto
         
-        await sql`INSERT INTO produtos (id, nome, preco, estoque) VALUES (${produtoID}, ${nome}, ${preco}, ${estoque})`
+        await sql`INSERT INTO products (id, name, price, stock) VALUES (${produtoID}, ${name}, ${price}, ${stock})`
     }
 
-    async list(nome) {
-        let produtos
+    async list(name) {
+        let products
 
-        if (nome && nome != '') {
-            produtos = await sql`SELECT * FROM produtos WHERE nome ILIKE ${`%${nome}%`}`
+        if (name && name != '') {
+            products = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`}`
         } else {
-            produtos = await sql`SELECT * FROM produtos`
+            products = await sql`SELECT * FROM products`
         }
         
-        return produtos
+        return products
     }
 
     async update(id, produto) {
-        const { nome, preco, estoque } = produto
+        const { name, price, stock } = produto
 
-        await sql`UPDATE produtos SET nome = ${nome}, preco = ${preco}, estoque = ${estoque} WHERE id = ${id}`
+        await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id}`
     }
 
     async delete(id) {
-        await sql`DELETE FROM produtos WHERE id = ${id}`
+        await sql`DELETE FROM products WHERE id = ${id}`
     }
 }

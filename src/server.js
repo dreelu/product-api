@@ -1,8 +1,7 @@
 import Fastify from 'fastify'
+import { Database } from './products.js'
 
-import { DatabasePostgres } from './products.js'
-
-const database = new DatabasePostgres()
+const database = new Database()
 
 const fastify = Fastify({
     logger:true
@@ -21,9 +20,9 @@ fastify.post('/products', async (req, reply) => {
 
 fastify.get('/products', async (req, reply) => {
     try {
-        const { nome } = req.query
+        const { name } = req.query
 
-        const products = await database.list(nome)
+        const products = await database.list(name)
 
         return products
     } catch (error) {
