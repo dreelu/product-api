@@ -1,13 +1,20 @@
 {
   "dependencies": {
+    "@fastify/swagger": "^9.6.1",
+    "@fastify/swagger-ui": "^5.2.4",
     "@neondatabase/serverless": "github:neondatabase/serverless",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "typescript": "^5.9.3",
+    "zod": "^4.3.5"
   },
   "type": "module",
   "scripts": {
-    "start": "node ./src/server.js"
+    "start": "node ./dist/server.js"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3"
   }
 }
