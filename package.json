@@ -5,6 +5,7 @@
     "@neondatabase/serverless": "github:neondatabase/serverless",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
+    "fastify-type-provider-zod": "^6.1.0",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "typescript": "^5.9.3",

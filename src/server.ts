@@ -2,11 +2,17 @@ import Fastify from 'fastify'
 import { fastifySwagger } from '@fastify/swagger'
 import { fastifySwaggerUi } from '@fastify/swagger-ui'
 import { routeProducts } from './routes/routes.js'
+import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import 'dotenv/config';
 
 const fastify = Fastify({
     logger:true
-})
+}).withTypeProvider<ZodTypeProvider>()
+
+// Zod =============================================================
+
+fastify.setValidatorCompiler(validatorCompiler);
+fastify.setSerializerCompiler(serializerCompiler);
 
 // Swagger =============================================================
 
@@ -16,7 +22,8 @@ await fastify.register(fastifySwagger, {
             title: 'Product API',
             version: '1.0.0',
         }
-    }
+    },
+    transform: jsonSchemaTransform
 })
 
 await fastify.register(fastifySwaggerUi, {
@@ -28,7 +35,7 @@ await fastify.register(fastifySwaggerUi, {
 fastify.register(routeProducts, { prefix: '/products' })
 
 // List =============================================================
-const PORT = Number(process.env.PORT) || 3000
+const PORT = Number(process.env.PORT) || 3333
 
 fastify.listen({
     port: PORT,

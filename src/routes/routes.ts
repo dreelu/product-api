@@ -1,12 +1,34 @@
 import { randomUUID } from "crypto";
-import { type FastifyInstance } from "fastify";
+import { type FastifyTypedInstance } from "../types/types.js";
 import { neon } from '@neondatabase/serverless';
+import z from "zod";
 import 'dotenv/config'
 
 const sql = neon(String(process.env.DATABASE_URL))
 
-export async function routeProducts(app: FastifyInstance) {
-    app.post('/products', async (req, reply) => {
+export async function routeProducts(app: FastifyTypedInstance) {
+    app.post('/', {
+        schema: {
+            tags: ['products'],
+            description: 'Create a new product.',
+            body: z.object({
+                name: z.string(),
+                price: z.coerce.number().refine(
+                    (n) => !Number.isInteger(n), {
+                    message: "Price must be an float number."
+                    }).min(0),
+                stock: z.number().int().min(0),
+            }),
+            response: {
+                201: z.array(z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    price: z.number(),
+                    stock: z.number(),
+                })),
+            }
+        }
+    }, async (req, reply) => {
     try {
         const productID = randomUUID()
 
@@ -19,13 +41,18 @@ export async function routeProducts(app: FastifyInstance) {
         await sql`INSERT INTO products (id, name, price, stock) VALUES (${productID}, ${name}, ${price}, ${stock})`
 
         return reply.code(201).send()
+
     }catch(error) {
         console.error(error)
-        return reply.status(500).send( {error: 'Internal server error'})
+        // return reply.status(500).send( {error: 'Internal server error'})
     }
     })
 
-    app.get('/products', async (req, reply) => {
+    app.get('/', {
+        schema: {
+            tags: ['products']
+        }
+    }, async (req, reply) => {
     try {
 
         const products = await sql`SELECT * FROM products`
@@ -37,7 +64,7 @@ export async function routeProducts(app: FastifyInstance) {
     }
     })
 
-    app.get('/products/:name', async (req, reply) => {
+    app.get('/:name', {schema: {tags: ['products']}}, async (req, reply) => {
     try {
         const { name } = req.params as {
             name: string
@@ -52,7 +79,7 @@ export async function routeProducts(app: FastifyInstance) {
     }
     })
 
-    app.put('/products/:id', async (req, reply) => {
+    app.put('/:id', {schema: {tags: ['products']}}, async (req, reply) => {
     try {
         const { id, name, price, stock  } = req.params as {
             id: string,
@@ -70,7 +97,7 @@ export async function routeProducts(app: FastifyInstance) {
     }
     })
 
-    app.delete('/products/:id', async (req, reply) => {
+    app.delete('/:id', {schema: {tags: ['products']}}, async (req, reply) => {
     try {
         const { id } = req.params as {
             id: string
