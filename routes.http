@@ -1,18 +1,18 @@
-POST http://localhost:3000/products
+POST http://localhost:3333/products
 Content-Type: application/json
 
 {
     "name": "Name example",
-    "price": 10,
+    "price": 10.01,
     "stock": 10
 }
 ###
-GET http://localhost:3000/products
+GET http://localhost:3333/products
 //May contain an name. 
 
 ###
 
-PUT http://localhost:3000/products/
+PUT http://localhost:3333/products/
 //Need a ID
 
 Content-Type: application/json
@@ -24,5 +24,5 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/products/
+DELETE http://localhost:3333/products/9aad52b9-4445-47a4-b6e2-605fc174e7f2
 //Need a ID to work

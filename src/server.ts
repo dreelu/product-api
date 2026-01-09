@@ -4,15 +4,23 @@ import { fastifySwaggerUi } from '@fastify/swagger-ui'
 import { routeProducts } from './routes/routes.js'
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import 'dotenv/config';
+import fastifyCors from '@fastify/cors';
 
 const fastify = Fastify({
     logger:true
 }).withTypeProvider<ZodTypeProvider>()
 
-// Zod =============================================================
+// Zod =================================================================
 
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
+
+// CORS ================================================================
+
+fastify.register(fastifyCors, {
+    origin: 'false',
+    methods: ['GET, POST, PUT, DELETE']
+})
 
 // Swagger =============================================================
 
@@ -30,11 +38,11 @@ await fastify.register(fastifySwaggerUi, {
     routePrefix: '/docs'
 })
 
-// Routes =============================================================
+// Routes ==============================================================
 
 fastify.register(routeProducts, { prefix: '/products' })
 
-// List =============================================================
+// List ================================================================
 const PORT = Number(process.env.PORT) || 3333
 
 fastify.listen({
