@@ -13,6 +13,7 @@
   },
   "type": "module",
   "scripts": {
+    "comp": "npx tsc",
     "start": "node ./dist/server.js"
   },
   "devDependencies": {
