@@ -20,7 +20,15 @@ export const BodySchema = z.object({
 })
 
 export const ParamsSchema = z.object({
-  id: z.string().describe('the user identifier, as userId.'),
-  name: z.string().describe('the user identifier, as name.')
+  id: z.string().describe('the product identifier, as ID.'),
+  name: z.string().describe('the product identifier, as name.')
 })
+
+export const querySchema = z.object({
+  id: z.string().optional(),
+  name: z.string().optional(),
+}).refine(
+  (v) => !(v.id && v.name),
+  { message: 'Use only id or name, not both at the same time.' }
+)
 
