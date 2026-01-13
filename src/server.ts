@@ -1,14 +1,56 @@
-import Fastify from 'fastify'
-import { fastifySwagger } from '@fastify/swagger'
-import { fastifySwaggerUi } from '@fastify/swagger-ui'
-import { routeProducts } from './routes/routes.js'
-import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import  Fastify, { type FastifyError } from 'fastify';
+import { fastifySwagger } from '@fastify/swagger';
+import { fastifySwaggerUi } from '@fastify/swagger-ui';
+import { routeProducts, ping } from './routes/routes.js';
+import { jsonSchemaTransform, serializerCompiler, validatorCompiler, hasZodFastifySchemaValidationErrors, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import 'dotenv/config';
 import fastifyCors from '@fastify/cors';
+import fastifyRequestLogger from "@mgcrea/fastify-request-logger";
 
 const fastify = Fastify({
-    logger:true
+    logger: {
+      level: 'debug',
+      transport: {
+        target: "@mgcrea/pino-pretty-compact",
+        options: {
+          colorize: true,
+          translateTime: "HH:MM:ss Z",
+          ignore: "pid,hostname",
+        },
+      }
+    },
 }).withTypeProvider<ZodTypeProvider>()
+
+fastify.register(fastifyRequestLogger)
+
+// ErrorHandling ========================================================
+
+fastify.setErrorHandler((error:FastifyError, req, reply) => {
+
+  if (hasZodFastifySchemaValidationErrors(error)) {
+    return reply.code(400).send({
+      error: 'Response Validation Error',
+      message: "Request doesn't match the schema",
+      statusCode: 400,
+      details: {
+        issues: error.validation,
+        method: req.method,
+        url: req.url,
+      },
+    });
+  }
+
+  if (error.statusCode) {
+    return reply.code(error.statusCode).send({
+      message: error.message
+    })
+  }
+
+  req.log.error(error)
+  reply.code(500).send({
+    message: 'Internal server errorrrrr'
+  })
+})
 
 // Zod =================================================================
 
@@ -29,21 +71,23 @@ await fastify.register(fastifySwagger, {
         info: {
             title: 'Product API',
             version: '1.0.0',
-        }
+        },
     },
     transform: jsonSchemaTransform
 })
 
 await fastify.register(fastifySwaggerUi, {
-    routePrefix: '/docs'
+    routePrefix: '/docs',
 })
 
 // Routes ==============================================================
 
 fastify.register(routeProducts, { prefix: '/products' })
+fastify.register(ping, {prefix: '/ping'})
 
 // List ================================================================
-const PORT = Number(process.env.PORT) || 3333
+
+const PORT = Number(process.env.PORT) || 3000
 
 fastify.listen({
     port: PORT,

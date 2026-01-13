@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
-import { type FastifyTypedInstance } from "../types/types.js";
+import { type FastifyTypedInstance, type Product } from "../types/types.js";
 import { neon } from '@neondatabase/serverless';
-import z from "zod";
+import z from 'zod';
 import 'dotenv/config'
+import { ProductsListResponse, ProductsResponseSchema, BodySchema, ParamsSchema } from "../schemas/schemas.js";
 
 const sql = neon(String(process.env.DATABASE_URL))
 
@@ -11,25 +12,12 @@ export async function routeProducts(app: FastifyTypedInstance) {
         schema: {
             tags: ['products'],
             description: 'Create a new product.',
-            body: z.object({
-                name: z.string(),
-                price: z.coerce.number().refine(
-                    (n) => !Number.isInteger(n), {
-                    message: "Price must be an float number."
-                    }).min(0),
-                stock: z.number().int().min(0),
-            }),
+            body: BodySchema,
             response: {
-                201: z.array(z.object({
-                    id: z.string(),
-                    name: z.string(),
-                    price: z.number(),
-                    stock: z.number(),
-                })),
+                201: z.null().describe('User created.')
             }
         }
     }, async (req, reply) => {
-    try {
         const productID = randomUUID()
 
         const { name, price, stock } = req.body as {
@@ -42,63 +30,80 @@ export async function routeProducts(app: FastifyTypedInstance) {
 
         return reply.code(201).send()
 
-    }catch(error) {
-        console.error(error)
-        // return reply.status(500).send( {error: 'Internal server error'})
-    }
+
     })
 
     app.get('/', {
         schema: {
-            tags: ['products']
-        }
+            tags: ['products'],
+            description: 'List all the products.',
+            response: {
+                200: ProductsListResponse,
+            }
+        },
     }, async (req, reply) => {
-    try {
 
-        const products = await sql`SELECT * FROM products`
+        const rawProducts = await sql`SELECT * FROM products`
 
-        return products
-    } catch (error) {
-        console.error(error)
-        return reply.status(500).send( {error: 'Internal server error'})
-    }
+        const products = ProductsResponseSchema.array().parse(rawProducts)
+
+        console.log(products) //DEBUG
+
+        return reply.status(200).send(products)
     })
 
-    app.get('/:name', {schema: {tags: ['products']}}, async (req, reply) => {
-    try {
+    app.get('/:name', {
+        schema: {
+            tags: ['products'],
+            description: 'List products by name.',
+            params: ParamsSchema.pick({name:true}),
+            response: {
+                200: ProductsListResponse,
+            }
+        }
+    }, async (req, reply) => {
+
         const { name } = req.params as {
             name: string
         }
 
-        const products = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`}`
+        const rawProducts = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`}`
 
-        return products
-    } catch (error) {
-        console.error(error)
-        return reply.status(500).send( {error: 'Internal server error'})
-    }
+        const products = ProductsResponseSchema.array().parse(rawProducts)
+
+        return reply.status(200).send(products)
+
     })
 
-    app.put('/:id', {schema: {tags: ['products']}}, async (req, reply) => {
-    try {
-        const { id, name, price, stock  } = req.params as {
-            id: string,
-            name: string,
-            price: number,
-            stock: number
+    app.put('/:id', {
+        schema: {
+            tags: ['products'],
+            description: 'Update a entire product.',
+            params: ParamsSchema.pick({id:true}),
+            body: BodySchema,
+            response: {
+                204: ProductsResponseSchema,
+            }
         }
+    }, async (req, reply) => {
+        const { id, name, price, stock  } = req.params as Product
 
         await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id}`
 
         return reply.code(204).send()
-    } catch(error) {
-        console.error(error)
-        return reply.status(500).send( {error: 'Internal server error'})
-    }
+
     })
 
-    app.delete('/:id', {schema: {tags: ['products']}}, async (req, reply) => {
-    try {
+    app.delete('/:id', {
+        schema: {
+            tags: ['products'],
+            description: 'Delete a product.',
+            params: ParamsSchema.pick({id:true}),
+            response: {
+                204: ProductsResponseSchema,
+            }
+        }
+    }, async (req, reply) => {
         const { id } = req.params as {
             id: string
         }
@@ -106,9 +111,11 @@ export async function routeProducts(app: FastifyTypedInstance) {
         await sql`DELETE FROM products WHERE id = ${id}`
 
         return reply.code(204).send()
-    } catch(error) {
-        console.error(error)
-        return reply.status(500).send( {error: 'Internal server error'})
-    }
+    })
+}
+
+export async function ping(app: FastifyTypedInstance) {
+    app.get('/', async (req, reply) => {
+        reply.send('pong')
     })
 }
