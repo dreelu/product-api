@@ -6,6 +6,7 @@ import { jsonSchemaTransform, serializerCompiler, validatorCompiler, hasZodFasti
 import 'dotenv/config';
 import fastifyCors from '@fastify/cors';
 import fastifyRequestLogger from "@mgcrea/fastify-request-logger";
+import { startTimeHook } from './plugins/observability.js';
 
 const fastify = Fastify({
     logger: {
@@ -22,6 +23,8 @@ const fastify = Fastify({
 }).withTypeProvider<ZodTypeProvider>()
 
 fastify.register(fastifyRequestLogger)
+
+startTimeHook(fastify)
 
 // ErrorHandling ========================================================
 
@@ -48,7 +51,7 @@ fastify.setErrorHandler((error:FastifyError, req, reply) => {
 
   req.log.error(error)
   reply.code(500).send({
-    message: 'Internal server errorrrrr'
+    message: 'Internal server error.'
   })
 })
 
@@ -70,7 +73,7 @@ await fastify.register(fastifySwagger, {
     openapi: {
         info: {
             title: 'Product API',
-            version: '1.0.0',
+            version: 'Beta 3.0.0',
         },
     },
     transform: jsonSchemaTransform

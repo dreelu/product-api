@@ -127,6 +127,12 @@ export async function routeProducts(app: FastifyTypedInstance) {
 
 export async function ping(app: FastifyTypedInstance) {
     app.get('/', async (req, reply) => {
-        reply.send('pong')
+
+        const deltaTime = Number(process.hrtime.bigint() - req.startTime) / 1e6
+
+        return {
+            latency: `${deltaTime}ms`,
+            message: 'pong'
+        }
     })
 }
