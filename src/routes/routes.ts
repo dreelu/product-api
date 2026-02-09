@@ -63,29 +63,6 @@ export async function routeProducts(app: FastifyTypedInstance) {
         return reply.status(200).send(products)
     })
 
-    // app.get('/:name', {
-    //     schema: {
-    //         tags: ['products'],
-    //         description: 'List products by name.',
-    //         params: ParamsSchema.pick({name:true}),
-    //         response: {
-    //             200: ProductsListResponse,
-    //         }
-    //     }
-    // }, async (req, reply) => {
-
-    //     const { name } = req.params as {
-    //         name: string
-    //     }
-
-    //     const rawProducts = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`}`
-
-    //     const products = ProductsResponseSchema.array().parse(rawProducts)
-
-    //     return reply.status(200).send(products)
-
-    // })
-
     app.put('/:id', {
         schema: {
             tags: ['products'],

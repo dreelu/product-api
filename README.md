@@ -17,6 +17,10 @@ Built to practice Node.js, Fastify, PostgreSQL, and basic REST API structure.
 - Update product  
 - Delete product  
 
+## Deploy
+
+[Documentation](https://product-api-ee86.onrender.com/docs)
+
 ## Requirements
 - Node.js 18+
 - PostgreSQL installed or running via Docker
@@ -26,12 +30,8 @@ Built to practice Node.js, Fastify, PostgreSQL, and basic REST API structure.
 Create a `.env` file:
 
 ```env
-PGHOST=localhost
-PGUSER=your_user
-PGPASSWORD=your_password
-PGDATABASE=loja
-PGPORT=5432
-PORT=3000
+DATABASE_URL='YOUR-DATABASE-URL-HERE'
+PORT=YOURPORT
 ```
 
 # Installation
@@ -49,14 +49,24 @@ npm install
 ### GET /products
 
 Returns all products.
+Expected response:
 
-### GET /products/search?name=value
+```json
+{
+  "id": "uuid",
+  "name": "Hammer",
+  "price": 10.00,
+  "stock": 50
+}
+```
+
+### GET /products?name=value
 
 Search products by name (ILIKE).
 
-### GET /products/:id
+### GET /products?id=value
 
-Returns a specific product.
+Search products by id
 
 ### POST /products
 
@@ -65,7 +75,7 @@ Expected body:
 
 ```json
 {
-  "name": "Martelo",
+  "name": "Hammer",
   "price": 10.00,
   "stock": 50
 }
