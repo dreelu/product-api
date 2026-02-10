@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
-import { type FastifyTypedInstance, type Product } from "../types/types.js";
+import { type FastifyTypedInstance } from "../types/types.js";
 import { neon } from '@neondatabase/serverless';
 import z from 'zod';
 import 'dotenv/config'
-import { ProductsListResponse, ProductsResponseSchema, BodySchema, ParamsSchema, querySchema } from "../schemas/schemas.js";
+import { ProductsListResponse, ProductsResponseSchema, BodySchema, ParamsSchema, querySchema, ErrorSchema, ZodTypeErrorSchema } from "../schemas/schemas.js";
 
 const sql = neon(String(process.env.DATABASE_URL))
 
@@ -14,7 +14,8 @@ export async function routeProducts(app: FastifyTypedInstance) {
             description: 'Create a new product.',
             body: BodySchema,
             response: {
-                201: z.null().describe('User created.')
+                201: z.null().describe('Productj created.'),
+                400: ZodTypeErrorSchema,
             }
         }
     }, async (req, reply) => {
@@ -28,7 +29,7 @@ export async function routeProducts(app: FastifyTypedInstance) {
         
         await sql`INSERT INTO products (id, name, price, stock) VALUES (${productID}, ${name}, ${price}, ${stock})`
 
-        return reply.code(201).send()
+        return reply.code(201).send(null)
 
 
     })
@@ -39,17 +40,19 @@ export async function routeProducts(app: FastifyTypedInstance) {
             description: 'List all the products.',
             response: {
                 200: ProductsListResponse,
+                404: ErrorSchema,
+                500: ErrorSchema,
             },
             querystring: querySchema
         }
     }, async (req, reply) => {
 
-        const { id, name } = req.query as Pick<Product, 'id' | 'name'>
+        const { id, name } = req.query
 
         let rawProducts;
 
         if (id) {
-            rawProducts = await sql`SELECT * FROM products WHERE id ILIKE ${`%${id}%`}`
+            rawProducts = await sql`SELECT * FROM products WHERE id = ${id}`
         } else if (name) {
             rawProducts = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`}`
         } else {
@@ -58,7 +61,10 @@ export async function routeProducts(app: FastifyTypedInstance) {
 
         const products = ProductsResponseSchema.array().parse(rawProducts)
 
-        console.log(products) //DEBUG
+        // If not foud.
+        if (products.length === 0) {
+            return reply.status(404).send({message: "Not found."})
+        }
 
         return reply.status(200).send(products)
     })
@@ -67,18 +73,26 @@ export async function routeProducts(app: FastifyTypedInstance) {
         schema: {
             tags: ['products'],
             description: 'Update a entire product.',
-            params: ParamsSchema.pick({id:true}),
+            params: ParamsSchema,
             body: BodySchema,
             response: {
-                204: ProductsResponseSchema,
+                204: z.null().describe("Product updated."),
+                404: ErrorSchema,
             }
         }
     }, async (req, reply) => {
-        const { id, name, price, stock  } = req.params as Product
+        const { id } = req.params
 
-        await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id}`
+        const { name, price, stock  } = req.body
 
-        return reply.code(204).send()
+        const result = await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id} RETURNING id`
+
+        // If not foud.
+        if (result.length === 0) {
+            return reply.status(404).send({message: "Not found."})
+        }
+
+        return reply.code(204).send(null)
 
     })
 
@@ -86,19 +100,23 @@ export async function routeProducts(app: FastifyTypedInstance) {
         schema: {
             tags: ['products'],
             description: 'Delete a product.',
-            params: ParamsSchema.pick({id:true}),
+            params: ParamsSchema,
             response: {
-                204: ProductsResponseSchema,
+                204: z.null().describe("Product deleted."),
+                404: ErrorSchema,
             }
         }
     }, async (req, reply) => {
-        const { id } = req.params as {
-            id: string
-        }
+        const { id } = req.params
         
-        await sql`DELETE FROM products WHERE id = ${id}`
+        const result = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`
 
-        return reply.code(204).send()
+        // If not foud.
+        if (result.length === 0) {
+            return reply.status(404).send({message: "Not found."})
+        }
+
+        return reply.code(204).send(null)
     })
 }
 

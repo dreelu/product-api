@@ -10,5 +10,3 @@ RawReplyDefaultExpression,
 FastifyBaseLogger,
 ZodTypeProvider
 >
-
-export type Product = z.infer<typeof ProductsResponseSchema>

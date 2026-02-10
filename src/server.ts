@@ -30,6 +30,10 @@ startTimeHook(fastify)
 
 fastify.setErrorHandler((error:FastifyError, req, reply) => {
 
+  const statusCode = error.statusCode ?? 500
+
+  console.error(error)
+
   if (hasZodFastifySchemaValidationErrors(error)) {
     return reply.code(400).send({
       error: 'Response Validation Error',
@@ -43,15 +47,8 @@ fastify.setErrorHandler((error:FastifyError, req, reply) => {
     });
   }
 
-  if (error.statusCode) {
-    return reply.code(error.statusCode).send({
-      message: error.message
-    })
-  }
-
-  req.log.error(error)
-  reply.code(500).send({
-    message: 'Internal server error.'
+  return reply.code(statusCode).send({
+    message: error.message || "Internal Server Error"
   })
 })
 
@@ -73,7 +70,7 @@ await fastify.register(fastifySwagger, {
     openapi: {
         info: {
             title: 'Product API',
-            version: 'Beta 3.0.0',
+            version: 'Beta 3.1.0',
         },
     },
     transform: jsonSchemaTransform
