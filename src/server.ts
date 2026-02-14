@@ -78,7 +78,7 @@ await fastify.register(fastifySwagger, {
     openapi: {
         info: {
             title: 'Product API',
-            version: 'Beta 3.2.0',
+            version: 'Beta 3.2.1',
         },
     },
     transform: jsonSchemaTransform

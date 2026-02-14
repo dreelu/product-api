@@ -55,11 +55,14 @@ export async function routeLogin(app: FastifyTypedInstance) {
     }, async(req, reply) => {
         const {email, password} = req.body
 
-        const res = await sql`SELECT email, id FROM users WHERE email = ${email}`
+        
 
-        // If user isen't registred yet
-        if (res.length === 0) {
-            return reply.status(400).send({ message: "User not registred yet." }) //400?
+        const res = await sql`SELECT email, id, password_hash FROM users WHERE email = ${email}`
+        const samePassword = await bcrypt.compare(password, res[0].password_hash)
+
+        // If user isen't registred yet / Missed email or password
+        if (res.length === 0 || !samePassword) {
+            return reply.status(400).send({ message: "Wrong password or email." }) //400?
         }
 
         const id = res[0].id
