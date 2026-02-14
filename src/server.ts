@@ -1,12 +1,14 @@
 import  Fastify, { type FastifyError } from 'fastify';
 import { fastifySwagger } from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
-import { routeProducts, ping } from './routes/routes.js';
+import { routeProducts, ping } from './routes/productRoutes.js';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, hasZodFastifySchemaValidationErrors, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import 'dotenv/config';
 import fastifyCors from '@fastify/cors';
+import jwt from '@fastify/jwt'
 import fastifyRequestLogger from "@mgcrea/fastify-request-logger";
 import { startTimeHook } from './plugins/observability.js';
+import { routeLogin, routeRegister } from './routes/authRoutes.js';
 
 const fastify = Fastify({
     logger: {
@@ -64,13 +66,19 @@ fastify.register(fastifyCors, {
     methods: ['GET, POST, PUT, DELETE']
 })
 
+// JWT
+
+fastify.register(jwt, {
+  secret: String(process.env.JWT_SECRET)
+})
+
 // Swagger =============================================================
 
 await fastify.register(fastifySwagger, {
     openapi: {
         info: {
             title: 'Product API',
-            version: 'Beta 3.1.0',
+            version: 'Beta 3.2.0',
         },
     },
     transform: jsonSchemaTransform
@@ -83,6 +91,8 @@ await fastify.register(fastifySwaggerUi, {
 // Routes ==============================================================
 
 fastify.register(routeProducts, { prefix: '/products' })
+fastify.register(routeRegister, {prefix: '/register'})
+fastify.register(routeLogin, {prefix: '/login'})
 fastify.register(ping, {prefix: '/ping'})
 
 // List ================================================================
