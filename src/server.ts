@@ -1,4 +1,4 @@
-import  Fastify, { type FastifyError } from 'fastify';
+import  Fastify, { FastifyRequest, type FastifyError } from 'fastify';
 import { fastifySwagger } from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
 import { routeProducts, ping } from './routes/productRoutes.js';
@@ -72,14 +72,30 @@ fastify.register(jwt, {
   secret: String(process.env.JWT_SECRET)
 })
 
+// PreHandler
+
+fastify.decorate("authenticate", async function (req) {
+  await req.jwtVerify()
+})
+
 // Swagger =============================================================
 
 await fastify.register(fastifySwagger, {
     openapi: {
+      openapi: '3.0.0',
         info: {
             title: 'Product API',
             version: 'Beta 3.2.1',
         },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT'
+            }
+          }
+        }
     },
     transform: jsonSchemaTransform
 })

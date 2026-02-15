@@ -3,29 +3,28 @@ import { type FastifyTypedInstance } from "../types/types.js";
 import { neon } from '@neondatabase/serverless';
 import z from 'zod';
 import 'dotenv/config'
-import { ProductsListResponse, ProductsResponseSchema, BodySchema, ParamsSchema, querySchema, ErrorSchema, ZodTypeErrorSchema } from "../schemas/schemas.js";
+import { ProductsListResponse, ProductsResponseSchema, BodySchema, ParamsSchema, querySchema, ErrorSchema, ZodTypeErrorSchema, HeaderSchema } from "../schemas/schemas.js";
 
 const sql = neon(String(process.env.DATABASE_URL))
 
 export async function routeProducts(app: FastifyTypedInstance) {
     app.post('/', {
         schema: {
-            tags: ['products'],
+            tags: ['Products'],
             description: 'Create a new product.',
             body: BodySchema,
+            headers: HeaderSchema,
+            security: [{ bearerAuth: [] }],
             response: {
-                201: z.null().describe('Productj created.'),
+                201: z.null().describe('Product created.'),
                 400: ZodTypeErrorSchema,
             }
-        }
+        },
+        preHandler: [app.authenticate]
     }, async (req, reply) => {
         const productID = randomUUID()
 
-        const { name, price, stock } = req.body as {
-            name: string,
-            price: number,
-            stock: number
-        }
+        const { name, price, stock } = req.body
         
         await sql`INSERT INTO products (id, name, price, stock) VALUES (${productID}, ${name}, ${price}, ${stock})`
 
@@ -36,15 +35,17 @@ export async function routeProducts(app: FastifyTypedInstance) {
 
     app.get('/', {
         schema: {
-            tags: ['products'],
+            tags: ['Products'],
             description: 'List all the products.',
             response: {
                 200: ProductsListResponse,
                 404: ErrorSchema,
                 500: ErrorSchema,
             },
+            security: [{ bearerAuth: [] }],
             querystring: querySchema
-        }
+        },
+        preHandler: [app.authenticate]
     }, async (req, reply) => {
 
         const { id, name } = req.query
@@ -71,15 +72,17 @@ export async function routeProducts(app: FastifyTypedInstance) {
 
     app.put('/:id', {
         schema: {
-            tags: ['products'],
+            tags: ['Products'],
             description: 'Update a entire product.',
             params: ParamsSchema,
             body: BodySchema,
+            security: [{ bearerAuth: [] }],
             response: {
                 204: z.null().describe("Product updated."),
                 404: ErrorSchema,
             }
-        }
+        },
+        preHandler: [app.authenticate]
     }, async (req, reply) => {
         const { id } = req.params
 
@@ -98,14 +101,16 @@ export async function routeProducts(app: FastifyTypedInstance) {
 
     app.delete('/:id', {
         schema: {
-            tags: ['products'],
+            tags: ['Products'],
             description: 'Delete a product.',
             params: ParamsSchema,
+            security: [{ bearerAuth: [] }],
             response: {
                 204: z.null().describe("Product deleted."),
                 404: ErrorSchema,
             }
-        }
+        },
+        preHandler: [app.authenticate]
     }, async (req, reply) => {
         const { id } = req.params
         

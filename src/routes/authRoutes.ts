@@ -13,6 +13,7 @@ const fastify = Fastify()
 export async function routeRegister(app: FastifyTypedInstance) {
     app.post('/', {
         schema: {
+            tags: ['Authentication'],
             body: RegisterBodySchema,
             response: {
                 201: AuthResponseSchema,
@@ -46,6 +47,7 @@ export async function routeRegister(app: FastifyTypedInstance) {
 export async function routeLogin(app: FastifyTypedInstance) {
     app.post('/', {
         schema: {
+            tags: ['Authentication'],
             body: LoginBodySchema,
             response: {
                 200: AuthResponseSchema,

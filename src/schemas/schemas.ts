@@ -40,7 +40,11 @@ export const ZodTypeErrorSchema = z.object({
 export const BodySchema = z.object({
   name: z.string().min(1),
   price: z.coerce.number().min(0),
-  stock: z.number().int().min(0),
+  stock: z.coerce.number().int().min(0),
+})
+
+export const HeaderSchema = z.object({
+  authorization: z.string().optional()
 })
 
 export const ParamsSchema = z.object({
