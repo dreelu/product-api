@@ -40,6 +40,7 @@ export async function routeProducts(app: FastifyTypedInstance) {
             description: 'List all the products.',
             response: {
                 200: ProductsListResponse,
+                401: ErrorSchema,
                 404: ErrorSchema,
                 500: ErrorSchema,
             },
@@ -50,17 +51,26 @@ export async function routeProducts(app: FastifyTypedInstance) {
     }, async (req, reply) => {
 
         const { id, name } = req.query
+        const {role, uid} = req.user
 
         let rawProducts;
 
-        if (id) {
-            rawProducts = await sql`SELECT * FROM products WHERE id = ${id}`
+        // If the user tried to show all the products, but it isen't an adm
+        if (!id && !name) {
+            if (role == 'adm') {
+                rawProducts = await sql`SELECT * FROM products`
+            } else{
+                rawProducts = await sql`SELECT * FROM products WHERE owner_uid = ${uid}`
+            }
+        } else if (id) {
+            rawProducts = await sql`SELECT * FROM products WHERE id = ${id} AND owner_uid = ${uid}`
         } else if (name) {
-            rawProducts = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`}`
-        } else {
-            rawProducts = await sql`SELECT * FROM products`
+            rawProducts = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`} AND owner_uid = ${uid}`
         }
+        
+        console.log(`USER INFO \n NAME: ${name}\n ROLE: ${role}`) //debug
 
+        
         const products = ProductsResponseSchema.array().parse(rawProducts)
 
         // If not foud.

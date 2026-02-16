@@ -65,7 +65,7 @@ export const querySchema = z.object({
 
 export const RegisterBodySchema = z.object({
   email: z.email().nonoptional(),
-  name: z.string().min(10),
+  name: z.string().min(3),
   password: z.string().min(5),
 })
 

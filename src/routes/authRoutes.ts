@@ -2,7 +2,6 @@ import { randomUUID } from "crypto";
 import bcrypt from "bcrypt"
 import { type FastifyTypedInstance } from "../types/types.js";
 import { neon } from '@neondatabase/serverless';
-import z from 'zod';
 import Fastify from 'fastify'
 import 'dotenv/config'
 import { ErrorSchema, LoginBodySchema, RegisterBodySchema, AuthResponseSchema } from "../schemas/schemas.js";
@@ -59,7 +58,7 @@ export async function routeLogin(app: FastifyTypedInstance) {
 
         
 
-        const res = await sql`SELECT email, uid, password_hash FROM users WHERE email = ${email}`
+        const res = await sql`SELECT uid, password_hash, role FROM users WHERE email = ${email}`
         const samePassword = await bcrypt.compare(password, res[0].password_hash)
 
         // If user isen't registred yet / Missed email or password
@@ -68,8 +67,10 @@ export async function routeLogin(app: FastifyTypedInstance) {
         }
 
         const uid = res[0].uid
+        const role = res[0].role
+        console.log(`USER ROLE: ${role}`) //DEBUG
         const token = req.server.jwt.sign(
-            { uid: uid, email: email },
+            { uid: uid, email: email, role: role },
             { expiresIn: '1h' }
         )
 
