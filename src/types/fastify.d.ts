@@ -12,3 +12,12 @@ declare module 'fastify' {
     ): Promise<void>
   }
 }
+
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: {
+      uid: string
+      email: string
+    }
+  }
+}

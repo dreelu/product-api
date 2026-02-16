@@ -25,8 +25,9 @@ export async function routeProducts(app: FastifyTypedInstance) {
         const productID = randomUUID()
 
         const { name, price, stock } = req.body
+        const owner_uid = req.user.uid
         
-        await sql`INSERT INTO products (id, name, price, stock) VALUES (${productID}, ${name}, ${price}, ${stock})`
+        await sql`INSERT INTO products (id, name, price, stock, owner_uid) VALUES (${productID}, ${name}, ${price}, ${stock}, ${owner_uid})`
 
         return reply.code(201).send(null)
 
