@@ -31,13 +31,13 @@ export async function routeRegister(app: FastifyTypedInstance) {
         }
         
         const password_hash = await bcrypt.hash(password, 10)
-        const id = randomUUID()
+        const uid = randomUUID()
         const token = req.server.jwt.sign(
-            { id: id, email: email },
+            { uid: uid, email: email },
             { expiresIn: '1h' }
         )
 
-        await sql`INSERT INTO users (id, email, name, password_hash) VALUES (${id}, ${email}, ${name}, ${password_hash})`
+        await sql`INSERT INTO users (uid, email, name, password_hash) VALUES (${uid}, ${email}, ${name}, ${password_hash})`
 
         return reply.status(201).send({message: "User created.", token: token})
 
@@ -59,7 +59,7 @@ export async function routeLogin(app: FastifyTypedInstance) {
 
         
 
-        const res = await sql`SELECT email, id, password_hash FROM users WHERE email = ${email}`
+        const res = await sql`SELECT email, uid, password_hash FROM users WHERE email = ${email}`
         const samePassword = await bcrypt.compare(password, res[0].password_hash)
 
         // If user isen't registred yet / Missed email or password
@@ -67,9 +67,9 @@ export async function routeLogin(app: FastifyTypedInstance) {
             return reply.status(400).send({ message: "Wrong password or email." }) //400?
         }
 
-        const id = res[0].id
+        const uid = res[0].uid
         const token = req.server.jwt.sign(
-            { id: id, email: email },
+            { uid: uid, email: email },
             { expiresIn: '1h' }
         )
 

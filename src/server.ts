@@ -85,7 +85,7 @@ await fastify.register(fastifySwagger, {
       openapi: '3.0.0',
         info: {
             title: 'Product API',
-            version: 'Beta 3.2.1',
+            version: 'Beta 3.2.2',
         },
         components: {
           securitySchemes: {
