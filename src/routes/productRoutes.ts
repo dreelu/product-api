@@ -127,8 +127,15 @@ export async function routeProducts(app: FastifyTypedInstance) {
         preHandler: [app.authenticate]
     }, async (req, reply) => {
         const { id } = req.params
+        const { uid, role } = req.user
         
-        const result = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`
+        let result
+
+        if (role == 'adm') {
+            result = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`
+        } else {
+            result = await sql`DELETE FROM products WHERE id = ${id} AND (owner_uid) = ${uid} RETURNING id`
+        }
 
         // If not foud.
         if (result.length === 0) {
