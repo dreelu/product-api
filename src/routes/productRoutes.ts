@@ -68,9 +68,6 @@ export async function routeProducts(app: FastifyTypedInstance) {
             rawProducts = await sql`SELECT * FROM products WHERE name ILIKE ${`%${name}%`} AND owner_uid = ${uid}`
         }
         
-        console.log(`USER INFO \n NAME: ${name}\n ROLE: ${role}`) //debug
-
-        
         const products = ProductsResponseSchema.array().parse(rawProducts)
 
         // If not foud.
@@ -96,14 +93,20 @@ export async function routeProducts(app: FastifyTypedInstance) {
         preHandler: [app.authenticate]
     }, async (req, reply) => {
         const { id } = req.params
-
+        const { uid, role } = req.user
         const { name, price, stock  } = req.body
 
-        const result = await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id} RETURNING id`
+        let result
+
+        if (role == 'adm') {
+            result = await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id} RETURNING id`
+        } else {
+            result = await sql`UPDATE products SET name = ${name}, price = ${price}, stock = ${stock} WHERE id = ${id} AND (owner_uid = ${uid}) RETURNING id`
+        }
 
         // If not foud.
         if (result.length === 0) {
-            return reply.status(404).send({message: "Not found."})
+            return reply.status(404).send({message: "Not found or unauthorized."})
         }
 
         return reply.code(204).send(null)

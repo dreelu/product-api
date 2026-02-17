@@ -68,7 +68,6 @@ export async function routeLogin(app: FastifyTypedInstance) {
 
         const uid = res[0].uid
         const role = res[0].role
-        console.log(`USER ROLE: ${role}`) //DEBUG
         const token = req.server.jwt.sign(
             { uid: uid, email: email, role: role },
             { expiresIn: '1h' }
