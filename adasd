@@ -1,0 +1,42 @@
+[1mdiff --git a/src/routes/authRoutes.ts b/src/routes/authRoutes.ts[m
+[1mindex 052d92e..8f6b07b 100644[m
+[1m--- a/src/routes/authRoutes.ts[m
+[1m+++ b/src/routes/authRoutes.ts[m
+[36m@@ -31,13 +31,13 @@[m [mexport async function routeRegister(app: FastifyTypedInstance) {[m
+         }[m
+         [m
+         const password_hash = await bcrypt.hash(password, 10)[m
+[31m-        const id = randomUUID()[m
+[32m+[m[32m        const uid = randomUUID()[m
+         const token = req.server.jwt.sign([m
+[31m-            { id: id, email: email },[m
+[32m+[m[32m            { uid: uid, email: email },[m
+             { expiresIn: '1h' }[m
+         )[m
+ [m
+[31m-        await sql`INSERT INTO users (id, email, name, password_hash) VALUES (${id}, ${email}, ${name}, ${password_hash})`[m
+[32m+[m[32m        await sql`INSERT INTO users (uid, email, name, password_hash) VALUES (${uid}, ${email}, ${name}, ${password_hash})`[m
+ [m
+         return reply.status(201).send({message: "User created.", token: token})[m
+ [m
+[36m@@ -59,7 +59,7 @@[m [mexport async function routeLogin(app: FastifyTypedInstance) {[m
+ [m
+         [m
+ [m
+[31m-        const res = await sql`SELECT email, id, password_hash FROM users WHERE email = ${email}`[m
+[32m+[m[32m        const res = await sql`SELECT email, uid, password_hash FROM users WHERE email = ${email}`[m
+         const samePassword = await bcrypt.compare(password, res[0].password_hash)[m
+ [m
+         // If user isen't registred yet / Missed email or password[m
+[36m@@ -67,9 +67,9 @@[m [mexport async function routeLogin(app: FastifyTypedInstance) {[m
+             return reply.status(400).send({ message: "Wrong password or email." }) //400?[m
+         }[m
+ [m
+[31m-        const id = res[0].id[m
+[32m+[m[32m        const uid = res[0].uid[m
+         const token = req.server.jwt.sign([m
+[31m-            { id: id, email: email },[m
+[32m+[m[32m            { uid: uid, email: email },[m
+             { expiresIn: '1h' }[m
+         )[m
+ [m

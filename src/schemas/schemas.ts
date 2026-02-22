@@ -1,4 +1,4 @@
-import z, { regexes } from 'zod';
+import z, { email, regexes } from 'zod';
 
 export const ProductsResponseSchema = z.object({
     id: z.string().regex(regexes.uuid()),
@@ -40,7 +40,11 @@ export const ZodTypeErrorSchema = z.object({
 export const BodySchema = z.object({
   name: z.string().min(1),
   price: z.coerce.number().min(0),
-  stock: z.number().int().min(0),
+  stock: z.coerce.number().int().min(0),
+})
+
+export const HeaderSchema = z.object({
+  authorization: z.string().optional()
 })
 
 export const ParamsSchema = z.object({
@@ -55,3 +59,25 @@ export const querySchema = z.object({
   { message: 'Use only id or name, not both at the same time.' }
 )
 
+// Auth Schemas
+
+/// Register
+
+export const RegisterBodySchema = z.object({
+  email: z.email().nonoptional(),
+  name: z.string().min(3),
+  password: z.string().min(5),
+})
+
+export const AuthResponseSchema = z.object({
+  message: z.string().min(1).optional(),
+  token: z.string().nonoptional()
+})
+
+/// Login
+
+export const LoginBodySchema = z.object({
+  email: z.email().nonoptional(),
+  password: z.string().nonoptional()
+
+})
